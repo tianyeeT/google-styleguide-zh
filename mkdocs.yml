@@ -1,6 +1,6 @@
 site_name: google-styleguide-zh
 
 theme:
-  name: mkdocs
+  name: readthedocs
   locale: zh
   highlightjs: true
