@@ -8,7 +8,7 @@
 
 ## Angular 语言规则
 
-### 使用 Closure 的 goog.require 和 goog.provide 来管理依赖关系。
+### 使用 Closure 的 goog.require 和 goog.provide 来管理依赖关系
 
 为你的项目选择一个命名空间，并使用 goog.provide 和 goog.require。
 
