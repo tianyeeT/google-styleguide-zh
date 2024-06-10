@@ -1,3 +1,3 @@
 # Google 代码风格（中文版）
 
-- Google Vimscript Style Guide
+- [Google Vimscript Style Guide](vimscript-style-guide-casual/index.md)
