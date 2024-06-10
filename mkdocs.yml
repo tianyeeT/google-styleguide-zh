@@ -1,0 +1,6 @@
+site_name: google-styleguide-zh
+
+theme:
+  name: mkdocs
+  locale: zh-cn
+  highlightjs: true
