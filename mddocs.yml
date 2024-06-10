@@ -1,6 +1,0 @@
-site_name: Bar Project
-
-theme:
-  name: mkdocs
-  locale: zh-cn
-  highlightjs: true
