@@ -11,7 +11,7 @@ Google R 风格指南是 Hadley Wickham [许可](https://creativecommons.org/lic
 Google 更喜欢使用 `BigCamelCase` 来标识函数，以清晰区分它们和其他对象。
 
 ```r
-# 好的
+# 正确
 DoNothing <- function() {
 return(invisible(NULL))
 }
@@ -20,7 +20,7 @@ return(invisible(NULL))
 私有函数的名称应以点号开头。这有助于传达函数的来源和预期用途。
 
 ```r
-# 好的
+# 正确
 .DoNothingPrivately <- function() {
 return(invisible(NULL))
 }
@@ -39,7 +39,7 @@ return(invisible(NULL))
 我们不支持使用右手赋值。
 
 ```r
-# 不好的
+# 错误
 iris %>%
 dplyr::summarize(max_petal = max(Petal.Width)) -> results
 ```
@@ -51,12 +51,12 @@ dplyr::summarize(max_petal = max(Petal.Width)) -> results
 不要依赖于 R 的隐式返回特性。最好明确表达你意图 `return()` 一个对象。
 
 ```r
-# 好的
+# 正确
 AddValues <- function(x, y) {
 return(x + y)
 }
 
-# 不好的
+# 错误
 AddValues <- function(x, y) {
 x + y
 }
@@ -67,7 +67,7 @@ x + y
 用户应该为所有外部函数显式限定命名空间。
 
 ```r
-# 好的
+# 正确
 purrr::map()
 ```
 
@@ -85,4 +85,4 @@ purrr::map()
 
 ### 包级别文档
 
-所有包都应该有一个包文档文件，在一个 `packagename-package.R` 文件中。
+所有包都应该有一个包文档文件，在一个 packagename-package.R 文件中。
