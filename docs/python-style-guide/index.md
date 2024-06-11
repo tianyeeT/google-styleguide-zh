@@ -1666,7 +1666,7 @@ Getter 和 setter应遵循[命名](#s3.16-naming)指南，例如`get_foo()`和`s
 
 如果过去的行为允许通过属性访问，请不要将新的 getter/setter 函数绑定到属性。任何仍然尝试通过旧方法访问变量的代码应该明显中断，以便他们意识到复杂性的变化。
 
-### 3.16 Naming
+### 命名
 
 `module_name`、`package_name`、`ClassName`、`method_name`、`ExceptionName`、`function_name`、`GLOBAL_CONSTANT_NAME`、`global_var_name`、`instance_var_name`、`function_parameter_name`、`local_var_name`、`query_proper_noun_for_thing`、`send_acronym_via_https`。
 
