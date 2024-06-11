@@ -6,7 +6,7 @@
 > 
 > 本文档的目的是描述应用于 iOS 和 OS X 代码的 Objective-C（以及 Objective-C++）编码指南和实践。这些指南在其他项目和团队中经过了时间的演变和验证。Google 开发的开源项目符合本指南的要求。
 > 
-> 请注意，本指南不是 Objective-C 教程。我们假设读者已经熟悉了这种语言。如果您对 Objective-C 不熟悉或需要复习，请阅读[《使用 Objective-C 编程》](https://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/Introduction/Introduction.html)。
+> 请注意，本指南不是 Objective-C 教程。我们假设读者已经熟悉了这种语言。如果你对 Objective-C 不熟悉或需要复习，请阅读[《使用 Objective-C 编程》](https://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/Introduction/Introduction.html)。
 
 ## 原则
 
@@ -501,12 +501,12 @@ NSInteger scalar2 = proto.longValue;  // 错误.
 
 ## 注释
 
-注释对于保持我们的代码可读性至关重要。以下规则描述了您应该在何处以及如何进行注释。但请记住：尽管注释很重要，但最好的代码是自解释的。为类型和变量赋予合理的名称比使用晦涩的名称然后尝试通过注释来解释它们要好得多。
+注释对于保持我们的代码可读性至关重要。以下规则描述了你应该在何处以及如何进行注释。但请记住：尽管注释很重要，但最好的代码是自解释的。为类型和变量赋予合理的名称比使用晦涩的名称然后尝试通过注释来解释它们要好得多。
 
 注意标点符号、拼写和语法；读起来容易的注释比读起来困难的注释更容易。
 
 注释应该与叙述性文本一样可读，具有适当的大写和标点符号。在许多情况下，完整的句子比句子片段更易读。较短的注释，例如在代码行末尾的注释，有时可能不太正式，但要使用一致的风格。
-在编写注释时，请为您的受众编写：下一个需要理解您的代码的贡献者。要慷慨一点——下一个可能就是你！
+在编写注释时，请为你的受众编写：下一个需要理解你的代码的贡献者。要慷慨一点——下一个可能就是你！
 
 ### 文件注释
 
@@ -545,7 +545,7 @@ NSInteger scalar2 = proto.longValue;  // 错误.
 
 对于接口，建议使用 Doxygen 风格的注释，因为 Xcode 解析这些注释以显示格式化的文档。有各种各样的 Doxygen 命令；在项目中要一致使用它们。
 
-如果您已经在文件顶部的注释中详细描述了一个接口，请随意简单地说明：“有关完整描述，请参见文件顶部的注释”，但一定要有某种形式的注释。
+如果你已经在文件顶部的注释中详细描述了一个接口，请随意简单地说明：“有关完整描述，请参见文件顶部的注释”，但一定要有某种形式的注释。
 
 此外，每个方法应该有一个注释，解释其功能、参数、返回值、线程或队列假设以及任何副作用。对于公共方法，文档注释应放在头部；对于非平凡的私有方法，文档注释应放在方法之前。
 
@@ -572,7 +572,7 @@ handler();
 
 如果有必要，还可以提供有关考虑或放弃的实现方法的注释。
 
-行尾注释应该与代码之间至少有 2 个空格的分隔。如果您有几个连续的注释行，通常更易读地将它们排成一行。
+行尾注释应该与代码之间至少有 2 个空格的分隔。如果你有几个连续的注释行，通常更易读地将它们排成一行。
 
 ```objectivec 
 // 正确:
@@ -587,3 +587,892 @@ handler();
 
 在 Doxygen 风格的注释中，最好使用等宽文本命令来标识符号，例如 `@c`。
 
+在涉及常见词汇可能使句子看起来构造不佳时，采用标识有助于提供清晰度。常见示例是符号 `count`：
+
+```objectivec 
+// 正确的例子:
+
+// 有时 `count` 可能小于零。
+```
+
+或者在引用已包含引号的内容时：
+
+```objectivec 
+// 正确的例子:
+
+// 记得调用 `StringWithoutSpaces("foo bar baz")`
+```
+
+当符号是不言自明时，不需要使用反引号或竖线。
+
+```objectivec 
+// 正确的例子:
+
+// 此类用作 GTMDepthCharge 的委托。
+```
+
+Doxygen 格式也适用于标识符号。
+
+```objectivec 
+// 正确的例子:
+
+/** @param maximum 最大值为 @c count。 */
+```
+
+### 对象所有权 
+
+对于不由 ARC 管理的对象，在超出最常见的 Objective-C 用法习惯范围之外时，尽可能使指针所有权模型明确。
+
+#### 手动引用计数 
+
+假定 NSObject 派生对象的实例变量是被保留的；如果它们没有被保留，它们应该被注释为弱引用，或者用 `__weak` 生命周期限定符声明。
+
+例外情况是在 Mac 软件中标记为 `@IBOutlets` 的实例变量，假定它们不被保留。
+
+当实例变量是指向 Core Foundation、C++ 和其他非 Objective-C 对象的指针时，它们应始终被声明为强引用和弱引用，以指示哪些指针是被保留的，哪些不是。Core Foundation 和其他非 Objective-C 对象指针需要明确的内存管理，即使构建为自动引用计数也是如此。
+
+强引用和弱引用声明的示例：
+
+```objectivec 
+// 正确的例子:
+
+@interface MyDelegate : NSObject
+
+@property(nonatomic) NSString *doohickey;
+@property(nonatomic, weak) NSString *parent;
+
+@end
+
+
+@implementation MyDelegate {
+  IBOutlet NSButton *_okButton;  // 普通的 NSControl；在 Mac 上隐式弱引用
+
+  AnObjcObject *_doohickey;  // 我的 doohickey
+  __weak MyObjcParent *_parent;  // 用于发送消息回去（拥有此实例）
+
+  // 非 NSObject 指针...
+  CWackyCPPClass *_wacky;  // 强引用，一些跨平台对象
+  CFDictionaryRef *_dict;  // 强引用
+}
+@end
+```
+
+#### 自动引用计数 
+
+使用 ARC 时，对象所有权和生命周期是明确的，因此不需要为自动保留的对象添加额外的注释。
+
+## C 语言特性 
+
+### 宏 
+
+避免使用宏，特别是在可以使用 `const` 变量、枚举、XCode 片段或 C 函数的情况下。
+
+宏使你看到的代码与编译器看到的代码不同。现代 C 使得传统用于常量和实用函数的宏的使用变得不必要。只有在没有其他解决方案可用时才应使用宏。
+
+如果需要宏，请使用唯一的名称以避免在编译单元中出现符号冲突的风险。如果可行，请在使用后限制作用域，使用 `#undefining` 宏。
+
+宏名称应使用 `SHOUTY_SNAKE_CASE`，即所有大写字母之间用下划线分隔。类似函数的宏可能使用 C 函数命名惯例。不要定义看起来像 C 或 Objective-C 关键字的宏。
+
+```objectivec 
+// 正确的例子:
+
+#define GTM_EXPERIMENTAL_BUILD ...      // 正确的例子
+
+// 除非 X > Y，否则断言
+#define GTM_ASSERT_GT(X, Y) ...         // 正确的例子，宏风格。
+
+// 除非 X > Y，否则断言
+#define GTMAssertGreaterThan(X, Y) ...  // 正确的例子，函数风格。
+```
+
+```objectivec 
+// 错误的例子:
+
+#define kIsExperimentalBuild ...        // 错误的例子
+
+#define unless(X) if(!(X))              // 错误的例子
+```
+
+避免扩展到不平衡的 C 或 Objective-C 结构的宏。避免引入作用域的宏，或者可能在块中捕获值的宏。
+
+避免生成用作公共 API 的头文件中的类、属性或方法定义的宏。这只会使代码难以理解，而语言本身已经有更好的方法来做到这一点。
+
+避免生成方法实现的宏，或者生成稍后在宏外部使用的变量声明的宏。宏不应该使代码难以理解，因为它们隐藏了变量的声明位置和方式。
+
+```objectivec 
+// 错误的例子:
+
+#define ARRAY_ADDER(CLASS) \
+  -(void)add ## CLASS ## :(CLASS *)obj toArray:(NSMutableArray *)array
+
+ARRAY_ADDER(NSString) {
+  if (array.count > 5) {              // 错误——'array' 定义在哪里？
+    ...
+  }
+}
+```
+
+可接受宏用法的示例包括基于构建设置有条件地编译的断言和调试日志宏——通常情况下，这些宏不会编译到发布版本中。
+
+### 非标准扩展
+
+除非另有规定，否则不得使用 C/Objective-C 的非标准扩展。
+
+编译器支持各种不属于标准 C 的扩展。例如，复合语句表达式（例如 `foo = ({ int x; Bar(&x); x })`）。
+
+`__attribute__` 是一个例外，因为它在 Objective-C API 规范中使用。
+
+条件运算符的二进制形式 `A ?: B` 也是一个例外。
+
+## Cocoa 和 Objective-C 功能
+
+### 标识指定的初始化器
+
+清晰地标识出你的指定初始化器。
+
+对于可能会子类化你的类的人来说，清晰地标识指定的初始化器很重要。这样，他们只需要重写单个初始化器（可能是多个中的一个）来确保调用子类的初始化器。这也有助于以后调试你的类的人理解初始化代码的流程，如果需要的话，他们可以逐步进行调试。使用注释或 `NS_DESIGNATED_INITIALIZER` 宏来标识指定的初始化器。如果使用 `NS_DESIGNATED_INITIALIZER`，请使用 `NS_UNAVAILABLE` 标记不支持的初始化器。
+
+### 覆盖指定的初始化器
+
+当编写需要 `init...` 方法的子类时，请确保覆盖父类的指定初始化器。
+
+如果未覆盖父类的指定初始化器，你的初始化器可能不会在所有情况下被调用，导致难以发现且非常困难的 bug。
+
+### 覆盖的 NSObject 方法放置
+
+将 NSObject 的覆盖方法放置在 `@implementation` 的顶部。
+
+这通常适用于（但不限于）`init...`、`copyWithZone:` 和 `dealloc` 方法。`init...` 方法应该分组在一起，然后是其他典型的 `NSObject` 方法，如 `description`、`isEqual:` 和 `hash`。
+
+用于创建实例的方便类工厂方法可以位于 `NSObject` 方法之前。
+
+### 初始化
+
+不要在 `init` 方法中将实例变量初始化为 `0` 或 `nil`；这样做是多余的。
+
+新分配对象的所有实例变量都会被[初始化为](https://developer.apple.com/library/mac/documentation/General/Conceptual/CocoaEncyclopedia/ObjectAllocation/ObjectAllocation.html) `0`（除了 isa），因此不要通过将变量重新初始化为 `0` 或 `nil` 来使 init 方法变得混乱。
+
+### 头文件中的实例变量应该是 @protected 或 @private
+
+实例变量通常应该在实现文件中声明，或者由属性自动合成。当实例变量在头文件中声明时，它们应该被标记为 `@protected` 或 `@private`。
+
+```objectivec 
+// 正确的例子:
+
+@interface MyClass : NSObject {
+ @protected
+  id _myInstanceVariable;
+}
+@end
+```
+
+### 不要使用 +new
+
+不要调用 `NSObject` 类方法 `new`，也不要在子类中覆盖它。`+new` 很少被使用，并且与初始化器的用法形成鲜明对比。而是使用 `+alloc` 和 `-init` 方法来实例化保留的对象。
+
+### 保持公共 API 简单
+
+保持你的类简单；避免“厨房水槽”API。如果一个方法不需要是公共的，请将其保持在公共接口之外。
+
+与 C++ 不同，Objective-C 不区分公共方法和私有方法；任何消息都可以发送给对象。因此，避免将方法放在公共 API 中，除非实际上期望被类的消费者使用。这有助于减少它们在不期望时被调用的可能性。这包括从父类中覆盖的方法。
+
+由于内部方法实际上并不私有，所以很容易意外地覆盖父类的“私有”方法，从而导致一个非常难以排查的 bug。通常，私有方法应该具有相当独特的名称，以防止子类意外地覆盖它们。
+
+### #import 和 #include
+
+`#import` Objective-C 和 Objective-C++ 头文件，以及 `#include` C/C++ 头文件。
+
+C/C++ 头文件使用 `#include` 包含其他 C/C++ 头文件。在 C/C++ 头文件中使用 `#import` 可以防止未来使用 `#include` 包含，并可能导致意外的编译行为。C/C++ 头文件应该提供自己的 `#define` 保护。
+
+### include的顺序
+
+头文件包含的标准顺序是相关的头文件、操作系统头文件、语言库头文件，最后是其他依赖项的头文件组。
+
+相关的头文件位于其他头文件之前，以确保它没有隐藏的依赖关系。对于实现文件，相关的头文件是头文件。对于测试文件，相关的头文件是包含被测试接口的头文件。
+
+空行可以分隔逻辑上不同的包含头文件组。
+
+在每个组内，包含应按字母顺序排列。
+
+使用相对于项目源目录的路径导入头文件。
+
+```objectivec 
+// 正确的例子:
+
+#import "ProjectX/BazViewController.h"
+
+#import <Foundation/Foundation.h>
+
+#include <unistd.h>
+#include <vector>
+
+#include "base/basictypes.h"
+#include "base/integral_types.h"
+#include "util/math/mathutil.h"
+
+#import "ProjectX/BazModel.h"
+#import "Shared/Util/Foo.h"
+```
+
+### 使用系统框架的整体头文件
+
+对于系统框架和系统库，应该导入整体头文件，而不是包含单独的文件。
+
+虽然从 Cocoa 或 Foundation 等框架中包含单独的系统头文件似乎很诱人，但实际上，如果包含顶级根框架，则编译器的工作量较小。顶级根框架通常是预编译的，可以更快地加载。此外，请记住，对于 Objective-C 框架，应该使用 `@import` 或 `#import`，而不是 `#include`。
+
+```objectivec 
+// 正确：
+
+@import UIKit;     // 正确。
+#import <Foundation/Foundation.h>     // 正确。
+```
+
+```objectivec 
+// 错误：
+
+#import <Foundation/NSArray.h>        // 错误。
+#import <Foundation/NSString.h>
+...
+```
+
+### 避免在初始化方法和 `-dealloc` 中发送当前对象的消息
+
+初始化方法和 `-dealloc` 中的代码应避免调用实例方法。
+
+在子类初始化之前，父类初始化完成。在所有类都有机会初始化其实例状态之前，对 self 的任何方法调用可能导致子类在未初始化的实例状态上操作。
+
+`-dealloc` 中也存在类似的问题，方法调用可能导致一个类在已释放的状态上操作。
+
+一个不太明显的情况是属性访问器。这些可以像任何其他选择器一样被覆盖。在初始化方法和 `-dealloc` 中，直接分配和释放 ivars，而不是依赖访问器，是可行的。
+
+```objectivec 
+// 正确：
+
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    _bar = 23;  // 好。
+  }
+  return self;
+}
+```
+
+注意将通用初始化代码合并到辅助方法中的情况：
+
+- 方法可以在子类中被覆盖，不管是有意还是由于命名冲突。
+- 在编辑辅助方法时，可能不明显代码是从初始化方法中运行的。
+
+```objectivec 
+// 错误：
+
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    self.bar = 23;  // 避免。
+    [self sharedMethod];  // 避免。对子类化或未来扩展很脆弱。
+  }
+  return self;
+}
+```
+
+```objectivec 
+// 正确：
+
+- (void)dealloc {
+  [_notifier removeObserver:self];  // 正确。
+}
+```
+
+```objectivec 
+// 避免：
+
+- (void)dealloc {
+  [self removeNotifications];  // 错误。
+}
+```
+
+### 设置器应复制 NSString
+
+接受 `NSString` 的设置器应始终复制它接受的字符串。对于诸如 `NSArray` 和 `NSDictionary` 这样的集合，通常也是如此。
+
+永远不要只保留字符串，因为它可能是 `NSMutableString`。这可以避免在你不知情的情况下，调用者对其进行更改。
+
+接收和持有集合对象的代码也应该考虑到传递的集合可能是可变的，因此集合更安全地被持有为原始的副本或可变副本。
+
+```objectivec 
+// 正确：
+
+@property(nonatomic, copy) NSString *name;
+
+- (void)setZigfoos:(NSArray<Zigfoo *> *)zigfoos {
+  // 确保我们持有一个不可变集合。
+  _zigfoos = [zigfoos copy];
+}
+```
+
+### 使用轻量级泛型来记录包含的类型
+
+在 Xcode 7 或更新版本上编译的所有项目应使用 Objective-C 的轻量级泛型表示法来为包含的对象类型进行类型标注。
+
+每个 `NSArray`、`NSDictionary` 或 `NSSet` 引用应使用轻量级泛型进行声明，以提高类型安全性，并明确记录用法。
+
+```objectivec 
+// 正确：
+
+@property(nonatomic, copy) NSArray<Location *> *locations;
+@property(nonatomic, copy, readonly) NSSet<NSString *> *identifiers;
+
+NSMutableArray<MyLocation *> *mutableLocations = [otherObject.locations mutableCopy];
+```
+
+如果全面标注的类型变得复杂，考虑使用 typedef 来保持可读性。
+
+```objectivec 
+// 正确:
+
+typedef NSSet<NSDictionary<NSString *, NSDate *> *> TimeZoneMappingSet;
+TimeZoneMappingSet *timeZoneMappings = [TimeZoneMappingSet setWithObjects:...];
+```
+
+使用最具描述性的公共超类或协议。在最通用的情况下，当没有其他信息可用时，使用 id 显式地声明集合为异构集合。
+
+```objectivec 
+// 正确:
+
+@property(nonatomic, copy) NSArray<id> *unknowns;
+```
+
+### 避免抛出异常 
+
+不要使用 `@throw` 抛出 Objective-C 异常，但应该准备从第三方或操作系统调用中捕获它们。
+
+这遵循了在[苹果的 Cocoa 异常编程主题简介](https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/Exceptions/Exceptions.html)中使用错误对象进行错误传递的建议。
+
+我们使用 `-fobjc-exceptions` 编译（主要是为了获得 `@synchronized`），但我们不抛出异常。在需要正确使用第三方代码或库时，允许使用 `@try`、`@catch` 和 `@finally`。如果你使用它们，请确切地记录哪些方法你希望抛出异常。
+
+### `nil` 检查 
+
+避免仅为防止向 `nil` 发送消息而进行 `nil` 指针检查。向 `nil` 发送消息[可靠地返回](http://www.sealiesoftware.com/blog/archive/2012/2/29/objc_explain_return_value_of_message_to_nil.html)`nil` 作为指针，作为整数或浮点值为零，结构体初始化为 `0`，_Complex 值等于 `{0, 0}`。
+
+```objectivec 
+// 错误:
+
+if (dataSource) {  // 错误。
+  [dataSource moveItemAtIndex:1 toIndex:0];
+}
+```
+
+```objectivec 
+// 正确:
+
+[dataSource moveItemAtIndex:1 toIndex:0];  // 正确。
+```
+
+请注意，这适用于 `nil` 作为消息目标，而不是作为参数值。单个方法可能会或可能不会安全地处理 `nil` 参数值。
+
+还要注意，这与检查 C/C++ 指针和块指针是否为 `NULL` 不同，运行时不会处理并将导致应用程序崩溃。你仍然需要确保不解引用 `NULL` 指针。
+
+### 可空性
+
+可以使用可空性注释来描述接口的使用方式和行为。可以接受使用可空性区域（例如，`NS_ASSUME_NONNULL_BEGIN` 和 `NS_ASSUME_NONNULL_END`）和显式的可空性注释。优先使用 `_Nullable` 和 `_Nonnull` 关键字，而不是 `__nullable` 和 `__nonnull` 关键字。对于 Objective-C 方法和属性，优先使用上下文敏感、非下划线的关键字，例如 `nonnull` 和 `nullable`。
+
+```objectivec 
+// 正确:
+
+/** 代表一个拥有的书籍的类。 */
+@interface GTMBook : NSObject
+
+/** 书籍的标题。 */
+@property(readonly, copy, nonnull) NSString *title;
+
+/** 书籍的作者，如果存在的话。 */
+@property(readonly, copy, nullable) NSString *author;
+
+/** 书籍的拥有者。将 nil 设置为默认拥有者。 */
+@property(copy, null_resettable) NSString *owner;
+
+/** 使用标题和可选作者初始化一本书。 */
+- (nonnull instancetype)initWithTitle:(nonnull NSString *)title
+                               author:(nullable NSString *)author
+    NS_DESIGNATED_INITIALIZER;
+
+/** 返回 nil，因为书籍预计有一个标题。 */
+- (nullable instancetype)init;
+
+@end
+
+/** 从指定路径的文件加载书籍。 */
+NSArray<GTMBook *> *_Nullable GTMLoadBooksFromFile(NSString *_Nonnull path);
+```
+
+```objectivec 
+// 错误:
+
+NSArray<GTMBook *> *__nullable GTMLoadBooksFromTitle(NSString *__nonnull path);
+```
+
+小心假设指针不为 null，因为编译器可能不能保证指针不为 null。
+
+### BOOL 陷阱 
+
+在将一般整数值转换为 `BOOL` 时要小心。避免直接与 `YES` 进行比较。
+
+在 OS X 和 32 位 iOS 构建中，`BOOL` 被定义为有符号 `char`，因此它可能具有除 `YES`（`1`）和 `NO`（`0`）之外的值。不要直接将一般整数值转换为 `BOOL`。
+
+常见错误包括将数组大小、指针值或按位逻辑操作的结果转换为 `BOOL`，这可能根据整数值的最后一个字节的值而导致 `NO` 值。当将通用整数值转换为 `BOOL` 时，应使用三元运算符返回 `YES` 或 `NO` 值。
+
+你可以安全地交换和转换 `BOOL`、`_Bool` 和 `bool`（参见 C++ Std 4.7.4、4.12 和 C99 Std 6.3.1.2）。在 Objective-C 方法签名中使用 `BOOL`。
+
+对于 `BOOL`，使用逻辑运算符（`&&`、`||` 和 `!`）也是有效的，并且将返回可以安全地转换为 `BOOL` 的值，而不需要使用三元运算符。
+
+```objectivec 
+// 错误:
+
+- (BOOL)isBold {
+  return [self fontTraits] & NSFontBoldTrait;  // 错误。
+}
+- (BOOL)isValid {
+  return [self stringValue];  // 错误。
+}
+```
+
+```objectivec 
+// 正确:
+
+- (BOOL)isBold {
+  return ([self fontTraits] & NSFontBoldTrait) ? YES : NO;
+}
+- (BOOL)isValid {
+  return [self stringValue] != nil;
+}
+- (BOOL)isEnabled {
+  return [self isValid] && [self isBold];
+}
+```
+
+此外，不要直接将 `BOOL` 变量与 `YES` 直接比较。不仅对于精通 C 的人来说更难阅读，而且上面的第一个要点说明返回值可能并不总是你所期望的。
+
+```objectivec 
+// 错误:
+
+BOOL great = [foo isGreat];
+if (great == YES) {  // 错误。
+  // ...be great!
+}
+```
+
+```objectivec 
+// 正确:
+
+BOOL great = [foo isGreat];
+if (great) {         // 正确。
+  // ...be great!
+}
+```
+
+### 没有实例变量的接口 
+
+省略没有声明任何实例变量的接口的空大括号。
+
+```objectivec 
+// 正确:
+
+@interface MyClass : NSObject
+// 做了很多事情。
+- (void)fooBarBam;
+@end
+```
+
+```objectivec 
+// 错误:
+
+@interface MyClass : NSObject {
+}
+// 做了很多事情。
+- (void)fooBarBam;
+@end
+```
+
+## Cocoa 模式 
+
+### 委托模式 
+
+委托、目标对象和块指针在会导致循环引用时不应该被保留。
+
+为了避免产生循环引用，委托或目标指针应在确定不再需要向对象发送消息时立即释放。
+
+如果没有明确的时间点指示委托或目标指针不再需要，那么指针应该仅以弱引用的方式被保留。
+
+块指针不能被弱引用保留。为了避免在客户端代码中产生循环引用，块指针应仅在被调用后或不再需要时明确释放。否则，应通过弱委托或目标指针进行回调。
+
+## Objective-C++ 
+
+### 风格与语言匹配 
+
+在 Objective-C++ 源文件中，遵循正在实现的函数或方法的语言的风格。为了在混合使用 Cocoa/Objective-C 和 C++ 时最小化不同命名风格之间的冲突，遵循正在实现的方法的风格。
+
+对于 `@implementation` 块中的代码，请使用 Objective-C 的命名规则。对于 C++ 类的方法中的代码，请使用 C++ 的命名规则。
+
+对于 Objective-C++ 文件中类实现之外的代码，请在文件内保持一致。
+
+```objectivec++ 
+// 正确:
+
+// 文件: cross_platform_header.h
+
+class CrossPlatformAPI {
+ public:
+  ...
+  int DoSomethingPlatformSpecific();  // 在每个平台上实现
+ private:
+  int an_instance_var_;
+};
+
+// 文件: mac_implementation.mm
+#include "cross_platform_header.h"
+
+/** 典型的 Objective-C 类，使用 Objective-C 的命名。 */
+@interface MyDelegate : NSObject {
+ @private
+  int _instanceVar;
+  CrossPlatformAPI* _backEndObject;
+}
+
+- (void)respondToSomething:(id)something;
+
+@end
+
+@implementation MyDelegate
+
+- (void)respondToSomething:(id)something {
+  // 通过我们的 C++ 后端桥接 Cocoa
+  _instanceVar = _backEndObject->DoSomethingPlatformSpecific();
+  NSString* tempString = [NSString stringWithFormat:@"%d", _instanceVar];
+  NSLog(@"%@", tempString);
+}
+
+@end
+
+/** C++ 类的平台特定实现，使用 C++ 的命名。 */
+int CrossPlatformAPI::DoSomethingPlatformSpecific() {
+  NSString* temp_string = [NSString stringWithFormat:@"%d", an_instance_var_];
+  NSLog(@"%@", temp_string);
+  return [temp_string intValue];
+}
+```
+
+项目可以选择使用 80 列的行长度限制，以保持与 Google 的 C++ 风格指南的一致性。
+
+## 空格和格式 
+
+### 空格与制表符 
+
+只使用空格，每次缩进 2 个空格。我们使用空格进行缩进。在你的代码中不要使用制表符。
+
+你应该设置你的编辑器在按下制表键时输出空格，并在行尾删除多余的空格。
+
+### 行长度 
+
+Objective-C 文件的最大行长度为 100 列。
+
+你可以通过在 Xcode 中启用 *首选项 > 文本编辑 > 在列处显示页面指南: 100* 来更容易地发现违规。
+
+### 方法声明和定义 
+
+`-` 或 `+` 与返回类型之间应使用一个空格，并且在参数列表中不使用空格，除了参数之间。
+
+方法应该像这样：
+
+```objectivec 
+// 正确:
+
+- (void)doSomethingWithString:(NSString *)theString {
+  ...
+}
+```
+
+在星号之前的空格是可选的。当添加新代码时，请与周围文件的风格保持一致。
+
+如果一个方法声明不能在单行上完全显示，则将每个参数放在单独的行上。除第一行外的所有行都应至少缩进四个空格。在参数之前的冒号应在所有行上对齐。如果方法声明中的第一行上的参数之前的冒号位置使得在后续行上的缩进小于四个空格，则只需要在除第一行外的所有行上进行冒号对齐。
+
+```objectivec 
+// 正确:
+
+- (void)doSomethingWithFoo:(GTMFoo *)theFoo
+                      rect:(NSRect)theRect
+                  interval:(float)theInterval {
+  ...
+}
+
+- (void)shortKeyword:(GTMFoo *)theFoo
+            longerKeyword:(NSRect)theRect
+    someEvenLongerKeyword:(float)theInterval
+                    error:(NSError **)theError {
+  ...
+}
+
+- (id<UIAdaptivePresentationControllerDelegate>)
+    adaptivePresentationControllerDelegateForViewController:(UIViewController *)viewController;
+
+- (void)presentWithAdaptivePresentationControllerDelegate:
+    (id<UIAdaptivePresentationControllerDelegate>)delegate;
+```
+
+### 函数声明和定义
+
+如果可能的话，倾向于将返回类型放在与函数名相同的行上，并且如果它们能够容纳，则将所有参数放在同一行上。如果参数列表不能放在单行上，请按照你在[函数调用](#Function_Calls)中换行参数的方式进行换行。
+
+```objectivec 
+// 正确:
+
+NSString *GTMVersionString(int majorVersion, minorVersion) {
+  ...
+}
+
+void GTMSerializeDictionaryToFileOnDispatchQueue(
+    NSDictionary<NSString *, NSString *> *dictionary,
+    NSString *filename,
+    dispatch_queue_t queue) {
+  ...
+}
+```
+
+函数的声明和定义还应满足以下条件：
+
+* 开括号必须始终与函数名在同一行。
+* 如果无法将返回类型和函数名放在单行上，请在它们之间换行，并且不要缩进函数名。
+* 在开括号之前绝不应该有空格。
+* 在函数括号和参数之间绝不应该有空格。
+* 开花括号始终在函数声明的最后一行末尾，而不是下一行的开始。
+* 闭花括号要么单独放在最后一行，要么与开花括号放在同一行。
+* 在闭括号和开花括号之间应该有一个空格。
+* 所有参数应尽可能对齐。
+* 函数范围应缩进 2 个空格。
+* 换行的参数应该有 4 个空格的缩进。
+
+### 条件语句
+
+在 `if`、`while`、`for` 和 `switch` 后面加上一个空格，并在比较运算符周围加上空格。
+
+```objectivec 
+// 正确:
+
+for (int i = 0; i < 5; ++i) {
+}
+
+while (test) {};
+```
+
+如果循环体或条件语句适合放在一行上，则可以省略大括号。
+
+```objectivec 
+// 正确:
+
+if (hasSillyName) LaughOutLoud();
+
+for (int i = 0; i < 10; i++) {
+  BlowTheHorn();
+}
+```
+
+```objectivec 
+// 错误:
+
+if (hasSillyName)
+  LaughOutLoud();               // 错误.
+
+for (int i = 0; i < 10; i++)
+  BlowTheHorn();                // 错误.
+```
+
+如果 `if` 语句有 `else` 语句，则两个语句块都应该使用大括号。
+
+```objectivec 
+// 正确:
+
+if (hasBaz) {
+  foo();
+} else {  // else 和右括号在同一行上。
+  bar();
+}
+```
+
+```objectivec 
+// 错误:
+
+if (hasBaz) foo();
+else bar();        // 错误.
+
+if (hasBaz) {
+  foo();
+} else bar();      // 错误.
+```
+
+有意的穿透到下一个 case 应该通过注释进行说明，除非在下一个 case 前没有其他代码。
+
+```objectivec 
+// 正确:
+
+switch (i) {
+  case 1:
+    ...
+    break;
+  case 2:
+    j++;
+    // Falls through.
+  case 3: {
+    int k;
+    ...
+    break;
+  }
+  case 4:
+  case 5:
+  case 6: break;
+}
+```
+
+### 表达式
+
+在二元操作符和赋值操作符周围使用空格。对于一元操作符，不需要添加空格。不要在括号内部添加空格。
+
+```objectivec 
+// 正确:
+
+x = 0;
+v = w * x + y / z;
+v = -y * (x + z);
+```
+
+表达式中的因子可以省略空格。
+
+```objectivec 
+// 正确:
+
+v = w*x + y/z;
+```
+
+### 方法调用
+
+方法调用应该与方法声明的格式相似。
+
+在选择格式样式时，应该遵循源文件中已使用的惯例。方法调用应该将所有参数放在一行上：
+
+```objectivec 
+// 正确:
+
+[myObject doFooWith:arg1 name:arg2 error:arg3];
+```
+
+或者每个参数一行，冒号对齐：
+
+```objectivec 
+// 正确:
+
+[myObject doFooWith:arg1
+               name:arg2
+              error:arg3];
+```
+
+不要使用以下任何样式：
+
+```objectivec 
+// 错误:
+
+[myObject doFooWith:arg1 name:arg2  // 一行上有多个参数
+              error:arg3];
+
+[myObject doFooWith:arg1
+               name:arg2 error:arg3];
+
+[myObject doFooWith:arg1
+          name:arg2  // 对齐关键字而不是冒号
+          error:arg3];
+```
+
+与声明和定义一样，如果第一个关键字比其他关键字短，请至少缩进后面的行，保持冒号对齐：
+
+```objectivec 
+// 正确:
+
+[myObj short:arg1
+          longKeyword:arg2
+    evenLongerKeyword:arg3
+                error:arg4];
+```
+
+包含多个内联块的调用可以在四个空格缩进的情况下将参数名称左对齐。
+
+### 函数调用
+
+函数调用应该包括尽可能多的参数，每行一个参数，除非需要为参数的清晰性或文档化而使用较短的行。
+
+函数参数的续行可以缩进以与开括号对齐，也可以缩进四个空格。
+
+```objectivec 
+// 正确:
+
+CFArrayRef array = CFArrayCreate(kCFAllocatorDefault, objects, numberOfObjects,
+                                 &kCFTypeArrayCallBacks);
+
+NSString *string = NSLocalizedStringWithDefaultValue(@"FEET", @"DistanceTable",
+    resourceBundle,  @"%@ feet", @"Distance for multiple feet");
+
+UpdateTally(scores[x] * y + bases[x],  // 评分启发式。
+            x, y, z);
+
+TransformImage(image,
+               x1, x2, x3,
+               y1, y2, y3,
+               z1, z2, z3);
+```
+
+使用具有描述性名称的局部变量缩短函数调用，并减少调用的嵌套。
+
+```objectivec 
+// 正确:
+
+double scoreHeuristic = scores[x] * y + bases[x];
+UpdateTally(scoreHeuristic, x, y, z);
+```
+
+### 异常
+
+使用 `@catch` 和 `@finally` 标签格式化异常，它们应该与前面的 `}` 放在同一行上。在 `@` 标签和开括号 (`{`) 之间添加一个空格，以及在 `@catch` 和被捕获对象声明之间也要添加一个空格。如果必须使用 Objective-C 异常，请按以下格式进行格式化。然而，参见 [Avoid Throwing Exceptions](#Avoid_Throwing_Exceptions) 了解为什么你不应该使用异常。
+
+```objectivec 
+// 正确:
+
+@try {
+  foo();
+} @catch (NSException *ex) {
+  bar(ex);
+} @finally {
+  baz();
+}
+```
+
+### 函数长度
+
+更倾向于编写小而专注的函数。
+
+长函数和方法偶尔是适当的，因此对函数长度没有硬性限制。如果函数超过约 40 行，请考虑它是否可以被拆分而不影响程序的结构。
+
+即使你的长函数现在完美运行，几个月后修改它的人可能会添加新的行为。这可能导致难以找到的错误。保持函数简短和简单，可以让其他人更容易阅读和修改你的代码。
+
+当更新旧代码时，还考虑将长函数分解为更小且更易管理的片段。
+
+### 垂直空白
+
+谨慎使用垂直空白。
+
+为了让更多的代码能够在屏幕上轻松查看，请避免将空行放在函数的括号内。
+
+在函数之间和代码的逻辑组之间，将空行限制为一到两行。
+
+## Objective-C 风格异常
+
+### 指示风格异常
+
+不符合这些风格建议的代码行在行尾需要添加 `// NOLINT`，或者在前一行末尾添加 `// NOLINTNEXTLINE`。有时需要忽略部分 Objective-C 代码必须忽略这些风格建议（例如，代码可能是机器生成的，或者代码结构使得无法正确地进行格式化）。
+
+可以使用该行的 `// NOLINT` 注释或前一行的 `// NOLINTNEXTLINE` 来指示读者代码是有意忽略风格指南的。此外，这些注释还可以被诸如代码检查器等自动化工具捕获并处理代码。请注意 `//` 和 `NOLINT*` 之间有一个空格。
