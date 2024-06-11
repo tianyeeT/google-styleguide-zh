@@ -6,3 +6,4 @@
 - [Google Angularjs Style Guide](angularjs-style-guide/index.md)
 - [Google Python Style Guide](python-style-guide/index.md)
 - [Google Objective-C Style Guide](objective-c-style-guide/index.md)
+- [Google Shell Style Guide](shell-style-guide/index.md)
